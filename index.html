@@ -24,7 +24,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--primary); color: white; min-height: 100vh; overflow-x: hidden; }
 
-        /* Root Navigation Layout */
+        /* Navigation Layout */
         .page-view {
             display: none;
             flex-direction: column;
@@ -34,14 +34,9 @@
             padding: 20px;
             background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
         }
-
         .page-view.active { display: flex; }
 
-        .home-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
+        .home-header { text-align: center; margin-bottom: 30px; }
         .home-header h1 {
             font-size: clamp(2.2rem, 6vw, 3.5rem);
             letter-spacing: 2px;
@@ -50,11 +45,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
-        .home-header p {
-            color: #94a3b8;
-            font-size: clamp(0.9rem, 2.5vw, 1.3rem);
-        }
+        .home-header p { color: #94a3b8; font-size: clamp(0.9rem, 2.5vw, 1.3rem); }
 
         /* Shared Button Styles */
         .button-grid {
@@ -64,10 +55,7 @@
             width: 100%;
             max-width: 900px;
         }
-
-        @media (max-width: 640px) {
-            .button-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 640px) { .button-grid { grid-template-columns: 1fr; } }
 
         .big-btn {
             display: flex;
@@ -86,24 +74,17 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 20px;
-            position: relative;
         }
-
-        .big-btn:hover {
-            transform: translateY(-5px);
-            filter: brightness(1.1);
-        }
-
+        .big-btn:hover { transform: translateY(-5px); filter: brightness(1.1); }
         .big-btn:active { transform: scale(0.95); }
         .big-btn span { font-size: 0.85rem; margin-top: 8px; opacity: 0.8; font-weight: normal; text-align: center; }
 
         .btn-ct { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
         .btn-gct { background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); }
-        
         .btn-rtg { background: var(--rtg-color); }
         .btn-qc { background: var(--qc-color); }
-        .btn-sc { background: #06b6d4; } /* Shore Crane color */
-        .btn-ship { background: #f43f5e; } /* Ship Crane color */
+        .btn-sc { background: #06b6d4; }
+        .btn-ship { background: #f43f5e; }
         .btn-control { background: var(--control-color); }
         .btn-pareto { background: var(--pareto-color); }
 
@@ -127,24 +108,17 @@
             padding-bottom: 10px;
             gap: 10px;
         }
-
         .header-bar h1 { font-size: clamp(0.9rem, 3vw, 1.2rem); }
 
         .nav-btn { 
-            background: var(--accent); 
-            color: white; 
-            padding: 8px 14px; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.7rem;
+            background: var(--accent); color: white; padding: 10px 18px; border: none; 
+            border-radius: 8px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 0.75rem;
+            transition: 0.2s;
         }
-        
+        .nav-btn:hover { filter: brightness(1.2); }
         .nav-btn.danger { background: var(--danger); }
 
-        /* Control Room Tables & Stats */
+        /* Stats & Tables */
         .cr-stats-bar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -152,31 +126,17 @@
             margin-bottom: 20px;
         }
         .stat-card {
-            background: var(--secondary);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            border-left: 5px solid;
+            background: var(--secondary); padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid;
         }
         .stat-open { border-color: var(--danger); }
         .stat-closed { border-color: var(--pareto-color); }
         .stat-card h3 { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; }
         .stat-card p { font-size: 1.8rem; font-weight: 800; }
 
-        .cr-container {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
+        .cr-container { display: flex; gap: 15px; flex-wrap: wrap; }
         .cr-split {
-            flex: 1;
-            min-width: 280px;
-            background: var(--secondary);
-            border-radius: 12px;
-            padding: 15px;
-            max-height: 500px;
-            display: flex;
-            flex-direction: column;
+            flex: 1; min-width: 280px; background: var(--secondary); border-radius: 12px;
+            padding: 15px; max-height: 500px; display: flex; flex-direction: column;
         }
         .cr-split h2 { margin-bottom: 10px; font-size: 1rem; border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
         .cr-split-table-wrapper { overflow-x: auto; flex: 1; overflow-y: auto; }
@@ -189,62 +149,80 @@
         /* Pareto Analytics */
         .pareto-layout { display: grid; grid-template-columns: 160px 1fr; gap: 20px; }
         @media (max-width: 768px) { .pareto-layout { grid-template-columns: 1fr; } }
-        
         .pareto-sidebar { display: flex; flex-direction: column; gap: 10px; }
         @media (max-width: 768px) { .pareto-sidebar { flex-direction: row; } }
-        .sidebar-btn { 
-            padding: 12px; border: none; background: var(--secondary); color: white; border-radius: 8px; 
-            cursor: pointer; font-weight: bold; text-align: left; transition: 0.2s; font-size: 0.75rem;
-        }
+        .sidebar-btn { padding: 12px; border: none; background: var(--secondary); color: white; border-radius: 8px; cursor: pointer; font-weight: bold; text-align: left; transition: 0.2s; font-size: 0.75rem; }
         .sidebar-btn.active { background: var(--pareto-color); }
 
-        /* Login & Console */
-        .login-card {
-            max-width: 450px;
-            margin: 40px auto;
-            background: var(--secondary);
-            padding: 25px;
-            border-radius: 12px;
+        /* Console UI Improvements */
+        .login-card { max-width: 450px; margin: 40px auto; background: var(--secondary); padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
+        .login-card input, .login-card select { width: 100%; padding: 14px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--accent); background: var(--primary); color: white; font-size: 1rem; }
+        
+        .andon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 100px; padding: 5px; }
+        .andon-btn { 
+            aspect-ratio: 1.6/1; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            background: linear-gradient(145deg, #1e293b, #0f172a); 
+            color: white; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            font-size: 0.7rem; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
+            padding: 10px;
         }
-        .login-card input, .login-card select {
-            width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px;
-            border: 1px solid var(--accent); background: var(--primary); color: white;
+        .andon-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
+        .andon-btn.active { 
+            background: linear-gradient(145deg, var(--active-orange), #ea580c) !important; 
+            border-color: white; 
+            transform: scale(0.96);
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
         }
-
-        .andon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
-        .andon-btn {
-            aspect-ratio: 1.8/1; border: 2px solid var(--accent); background: var(--secondary); color: white;
-            border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.65rem;
-        }
-        .andon-btn.active { background: var(--active-orange) !important; border-color: white; }
 
         @keyframes blinker { 50% { opacity: 0.2; } }
 
+        /* The Close Andon Button Style */
         .close-bar {
-            width: 100%; height: 60px; margin-top: 15px; background: var(--accent); border: none;
-            border-radius: 12px; color: white; font-size: 1.2rem; font-weight: bold; text-transform: uppercase;
+            position: sticky;
+            bottom: -15px;
+            left: 0;
+            width: calc(100% + 30px);
+            margin-left: -15px;
+            height: 90px;
+            background: #1e293b;
+            border: none;
+            color: rgba(255,255,255,0.3);
+            font-size: 2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: not-allowed;
+            z-index: 50;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
         }
-        .close-bar.blinking { background: #eab308; color: black; cursor: pointer; animation: blinker 0.8s linear infinite; }
-
-        .filter-ribbon { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--accent); padding-bottom: 10px; }
-        .filter-ribbon label { font-size: 0.6rem; color: #94a3b8; margin-bottom: 2px; }
-        .filter-ribbon select, .filter-ribbon input { padding: 6px; border-radius: 4px; background: var(--primary); color: white; border: 1px solid var(--accent); font-size: 0.7rem; }
+        .close-bar.blinking {
+            background: #eab308;
+            color: black;
+            cursor: pointer;
+            animation: blinker 0.8s linear infinite;
+        }
 
         .chart-section { margin-bottom: 25px; background: rgba(0,0,0,0.1); padding: 15px; border-radius: 12px; }
         .chart-section h3 { margin-bottom: 10px; font-size: 0.85rem; color: #fff; text-transform: uppercase; }
 
-        #confirmModal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; padding: 20px;
-        }
+        #confirmModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
         .confirm-box { background: var(--secondary); padding: 25px; border-radius: 12px; text-align: center; max-width: 350px; border: 1px solid var(--danger); }
         .confirm-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
     </style>
 </head>
 <body>
 
-<!-- 1. MAIN ROOT PAGE -->
 <div id="mainRootPage" class="page-view active">
     <div class="home-header">
         <h1>PORT ANDON SYSTEM</h1>
@@ -256,7 +234,6 @@
     </div>
 </div>
 
-<!-- 2. GCT DASHBOARD -->
 <div id="gctDashboard" class="page-view">
     <div class="home-header">
         <button class="nav-btn danger" style="margin-bottom: 15px;" onclick="navigateTo('mainRootPage')">← Switch Terminal</button>
@@ -272,7 +249,6 @@
     </div>
 </div>
 
-<!-- 3. CT DASHBOARD -->
 <div id="ctDashboard" class="page-view">
     <div class="home-header">
         <button class="nav-btn danger" style="margin-bottom: 15px;" onclick="navigateTo('mainRootPage')">← Switch Terminal</button>
@@ -287,44 +263,44 @@
     </div>
 </div>
 
-<!-- OVERLAYS -->
-
-<!-- Asset Login -->
+<!-- Overlays -->
 <div id="loginOverlay" class="overlay">
     <div class="header-bar">
-        <button class="nav-btn danger" onclick="hideOverlay('loginOverlay')">🏠 Home</button>
+        <button class="nav-btn" onclick="hideOverlay('loginOverlay')">← Back to Terminal</button>
         <h1 id="loginTitle">ASSET LOGIN</h1>
-        <div style="width:50px"></div>
+        <button class="nav-btn danger" onclick="navigateTo('mainRootPage')">ROOT HOME</button>
     </div>
     <div class="login-card">
-        <h2 id="loginSubtitle">OPERATOR ACCESS</h2>
+        <h2 id="loginSubtitle" style="margin-bottom: 15px;">OPERATOR ACCESS</h2>
         <input type="text" id="staffId" placeholder="Enter Staff ID">
+        <input type="text" id="vesselNameInput" placeholder="Enter Vessel Name" style="display:none;">
         <select id="assetSelect"></select>
-        <button id="loginActionBtn" class="big-btn" style="width: 100%; font-size: 1.2rem; height: 50px; margin-top: 20px;" onclick="enterConsole()">ENTER CONSOLE</button>
+        <button id="loginActionBtn" class="big-btn" style="width: 100%; font-size: 1.2rem; height: 60px; margin-top: 20px;" onclick="enterConsole()">ENTER CONSOLE</button>
     </div>
 </div>
 
-<!-- Andon Console -->
 <div id="andonConsole" class="overlay">
     <div class="header-bar">
-        <button class="nav-btn danger" onclick="exitConsole()">🏠 Home / Logout</button>
+        <div style="display: flex; gap: 10px;">
+            <button class="nav-btn" onclick="hideOverlay('andonConsole')">🏠 HOME</button>
+            <button class="nav-btn danger" onclick="exitAndLogout()">🚪 LOGOUT</button>
+        </div>
         <h1 id="consoleTitle">CONSOLE</h1>
-        <div style="width:50px"></div>
+        <div style="width: 120px;"></div> <!-- Spacer -->
     </div>
     <div class="andon-container">
         <div class="andon-section">
-            <h2>OPS ANDONS</h2>
+            <h2 style="margin-bottom:12px; font-size:1.1rem; color:var(--rtg-color); border-left: 4px solid var(--rtg-color); padding-left: 10px;">OPS ANDONS</h2>
             <div class="andon-grid" id="opsGrid"></div>
         </div>
         <div class="andon-section">
-            <h2>TECH ANDONS</h2>
+            <h2 style="margin-bottom:12px; font-size:1.1rem; color:var(--danger); border-left: 4px solid var(--danger); padding-left: 10px;">TECH ANDONS</h2>
             <div class="andon-grid" id="techGrid"></div>
         </div>
         <button id="closeAndonBtn" class="close-bar" onclick="triggerCloseAndon()">CLOSE ANDON</button>
     </div>
 </div>
 
-<!-- Control Room -->
 <div id="controlRoom" class="overlay">
     <div class="header-bar">
         <button class="nav-btn danger" onclick="hideOverlay('controlRoom')">🏠 Home</button>
@@ -357,20 +333,17 @@
     </div>
 </div>
 
-<!-- Pareto View -->
 <div id="paretoView" class="overlay">
     <div class="header-bar">
         <button class="nav-btn danger" onclick="hideOverlay('paretoView')">🏠 Home</button>
-        <h1 id="pMainTitle">ANALYTICS</h1>
+        <h1>ANALYTICS</h1>
         <div style="display: flex; gap: 5px;">
             <button onclick="requestReset()" class="nav-btn">🗑️</button>
             <button onclick="downloadLog()" class="nav-btn">📥</button>
         </div>
     </div>
     <div class="pareto-layout">
-        <div class="pareto-sidebar" id="pSidebar">
-            <!-- Dynamic sidebar buttons based on terminal -->
-        </div>
+        <div class="pareto-sidebar" id="pSidebar"></div>
         <div class="pareto-content">
             <div class="filter-ribbon">
                 <div><label>Mode</label><select id="pTimeFilter" onchange="renderPareto()"><option value="live">Live</option><option value="24h">24h</option><option value="range">Range</option></select></div>
@@ -386,7 +359,6 @@
     </div>
 </div>
 
-<!-- Reset Modal -->
 <div id="confirmModal">
     <div class="confirm-box">
         <h2 style="color: var(--danger);">⚠️ Reset Data?</h2>
@@ -399,9 +371,7 @@
 </div>
 
 <script>
-    // --- Configuration ---
     const config = {
-        // CT Assets
         'RTG': {
             range: [33, 128], prefix: 'RTG', terminal: 'CT',
             ops: ["NO TT", "NO JOB TO DO", "GANTRY", "WHEELTURN", "ACCIDENT", "CONTAINER ALIGNMENT", "OTHERS"],
@@ -412,11 +382,10 @@
             ops: ["WAITING FOR TT", "WAITING FOR SAFETY CAGE", "WAITING FOR OHF", "ACCIDENT", "CONNECTING WIRE SLING", "JAMMED TWISTLOCK", "WAITING FOR GEAR BOX", "DAMAGED CONTAINER", "LASHING", "UNLASHING"],
             tech: ["HOIST FAULT", "SPREADER FAULT", "GANTRY FAULT", "CONTROL/POWER", "SKEW/TRIM", "TROLLEY", "SPEED", "OTHER FAULTS"]
         },
-        // GCT Assets
         'SHORE CRANE': {
             list: ["LHM600#08", "LHM600#09", "LHM180#07", "Gottwald #05", "Gottwald #06"],
             prefix: 'SC', terminal: 'GCT',
-            ops: ["Waiting for Truck", "No cargo", "Moving to hatch", "waiting for wheel loader", "Others"],
+            ops: ["Waiting for Truck", "No cargo", "Moving to hatch", "waiting for wheel loader", "Draft Survey", "Vessel Trimming", "Others"],
             tech: ["hoisting fault", "Boom fault", "gantry fault", "Grab Fault", "Swing fault", "Control/Power", "Others"]
         },
         'SHIP CRANE': {
@@ -431,14 +400,19 @@
         }
     };
 
-    let appTerminal = 'CT';
-    let appMode = 'RTG', currentAsset = null, currentStaff = null, pMode = 'RTG';
-    let activeAndons = JSON.parse(localStorage.getItem('port_active')) || [];
-    let logs = JSON.parse(localStorage.getItem('port_logs')) || [];
+    let appTerminal = 'CT', appMode = 'RTG', currentAsset = null, currentStaff = null, currentVessel = "";
+    
+    let activeAndons = JSON.parse(localStorage.getItem('andon_active')) || [];
+    let logs = JSON.parse(localStorage.getItem('andon_logs')) || [];
 
     window.onload = () => { updateControlRoomTables(); setInterval(updateTimers, 1000); };
 
-    // --- Navigation ---
+    function saveData() {
+        localStorage.setItem('andon_active', JSON.stringify(activeAndons));
+        localStorage.setItem('andon_logs', JSON.stringify(logs));
+        updateControlRoomTables();
+    }
+
     function navigateTo(id) {
         document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -450,27 +424,34 @@
     function showOverlay(id) {
         document.getElementById(id).style.display = 'block';
         if(id === 'controlRoom') updateControlRoomTables();
-        if(id === 'paretoView') initPareto();
+        if(id === 'paretoView') { window.paretoOpen = true; initPareto(); }
     }
 
-    function hideOverlay(id) { document.getElementById(id).style.display = 'none'; }
+    function hideOverlay(id) { 
+        document.getElementById(id).style.display = 'none'; 
+        if(id === 'paretoView') window.paretoOpen = false;
+    }
 
-    // --- Login & Console ---
     function openLogin(mode) {
         appMode = mode;
         const select = document.getElementById('assetSelect');
+        const vesselInput = document.getElementById('vesselNameInput');
         document.getElementById('loginTitle').innerText = `${mode} LOGIN`;
         document.getElementById('loginActionBtn').style.backgroundColor = getAssetColor(mode);
-        select.innerHTML = '';
         
-        // Use predefined list if available, else use range
-        if (config[mode].list) {
-            config[mode].list.forEach(item => select.add(new Option(item, item)));
+        if (mode === 'SHORE CRANE') {
+            vesselInput.style.display = 'block';
         } else {
+            vesselInput.style.display = 'none';
+            vesselInput.value = "";
+        }
+
+        select.innerHTML = '';
+        if (config[mode].list) config[mode].list.forEach(item => select.add(new Option(item, item)));
+        else {
             const [start, end] = config[mode].range;
             for(let i = start; i <= end; i++) {
-                const val = i < 10 ? `0${i}` : i;
-                const text = `${config[mode].prefix} ${val}`;
+                const text = `${config[mode].prefix} ${i < 10 ? '0'+i : i}`;
                 select.add(new Option(text, text));
             }
         }
@@ -484,17 +465,32 @@
     }
 
     function enterConsole() {
-        currentStaff = document.getElementById('staffId').value;
+        const staffVal = document.getElementById('staffId').value;
+        if(!staffVal) return;
+        
+        currentStaff = staffVal;
         currentAsset = document.getElementById('assetSelect').value;
-        if(!currentStaff) return;
-        document.getElementById('consoleTitle').innerText = `${currentAsset} | ${currentStaff}`;
+        currentVessel = document.getElementById('vesselNameInput').value;
+        
+        let headerText = `${currentAsset} | ${currentStaff}`;
+        if(currentVessel) headerText += ` | ${currentVessel}`;
+        
+        document.getElementById('consoleTitle').innerText = headerText;
         initAndonGrids();
         hideOverlay('loginOverlay');
         showOverlay('andonConsole');
         refreshConsoleUI();
     }
 
-    function exitConsole() { currentAsset = null; currentStaff = null; hideOverlay('andonConsole'); }
+    function exitAndLogout() {
+        currentAsset = null;
+        currentStaff = null;
+        currentVessel = "";
+        document.getElementById('staffId').value = "";
+        document.getElementById('vesselNameInput').value = "";
+        hideOverlay('andonConsole');
+        showOverlay('loginOverlay');
+    }
 
     function initAndonGrids() {
         const opsGrid = document.getElementById('opsGrid'), techGrid = document.getElementById('techGrid');
@@ -512,17 +508,20 @@
 
     function raiseAndon(fault, group) {
         if(activeAndons.some(a => a.asset === currentAsset)) return;
-        activeAndons.push({ 
-            id: Date.now(), 
-            terminal: appTerminal,
-            mode: appMode, 
-            asset: currentAsset, 
-            staff: currentStaff, 
-            group: group, 
-            fault: fault, 
-            start: Date.now() 
-        });
-        saveState(); refreshConsoleUI();
+        const entry = { id: Date.now(), terminal: appTerminal, mode: appMode, asset: currentAsset, staff: currentStaff, vessel: currentVessel, group: group, fault: fault, start: Date.now() };
+        activeAndons.push(entry);
+        saveData();
+        refreshConsoleUI();
+    }
+
+    function triggerCloseAndon() {
+        const idx = activeAndons.findIndex(a => a.asset === currentAsset);
+        if(idx === -1) return;
+        const active = activeAndons.splice(idx, 1)[0];
+        const logEntry = { ...active, end: Date.now(), duration: Math.floor((Date.now() - active.start) / 1000) };
+        logs.push(logEntry);
+        saveData();
+        refreshConsoleUI();
     }
 
     function refreshConsoleUI() {
@@ -532,48 +531,22 @@
         closeBtn.classList.toggle('blinking', !!active);
     }
 
-    function triggerCloseAndon() {
-        const idx = activeAndons.findIndex(a => a.asset === currentAsset);
-        if(idx === -1) return;
-        const closed = activeAndons.splice(idx, 1)[0];
-        logs.push({ ...closed, end: Date.now(), duration: Math.floor((Date.now() - closed.start) / 1000) });
-        saveState(); refreshConsoleUI();
-    }
-
-    function saveState() {
-        localStorage.setItem('port_active', JSON.stringify(activeAndons));
-        localStorage.setItem('port_logs', JSON.stringify(logs));
-        updateControlRoomTables();
-    }
-
-    // --- Control Room & Monitoring ---
     function updateControlRoomTables() {
         const rtgBody = document.getElementById('rtgControlBody'), qcBody = document.getElementById('qcControlBody');
         const countOpenEl = document.getElementById('countOpen'), countClosedEl = document.getElementById('countClosed');
-        
+        if (!rtgBody) return;
         rtgBody.innerHTML = ''; qcBody.innerHTML = '';
-        
         const terminalActive = activeAndons.filter(a => a.terminal === appTerminal);
         const terminalLogs = logs.filter(l => l.terminal === appTerminal);
-
-        // Titles based on Terminal
-        if(appTerminal === 'CT') {
-            document.getElementById('crTitleLeft').innerText = "RTG LIVE";
-            document.getElementById('crTitleRight').innerText = "QC LIVE";
-        } else {
-            document.getElementById('crTitleLeft').innerText = "CRANES LIVE";
-            document.getElementById('crTitleRight').innerText = "RTG LIVE";
-        }
-
+        document.getElementById('crTitleLeft').innerText = appTerminal === 'CT' ? "RTG LIVE" : "CRANES LIVE";
+        document.getElementById('crTitleRight').innerText = appTerminal === 'CT' ? "QC LIVE" : "RTG LIVE";
         terminalActive.forEach(a => {
-            const row = `<tr><td>${a.asset}</td><td>${a.staff}</td><td class="blink-text">${a.fault}</td><td id="timer-${a.id}">--</td></tr>`;
-            if(appTerminal === 'CT') {
-                if(a.mode === 'RTG') rtgBody.innerHTML += row; else qcBody.innerHTML += row;
-            } else {
-                if(a.mode.includes('CRANE')) rtgBody.innerHTML += row; else qcBody.innerHTML += row;
-            }
+            let assetDisplay = a.asset;
+            if(a.vessel) assetDisplay += ` (${a.vessel})`;
+            const row = `<tr><td>${assetDisplay}</td><td>${a.staff}</td><td class="blink-text">${a.fault}</td><td id="timer-${a.id}">--</td></tr>`;
+            if(appTerminal === 'CT') { if(a.mode === 'RTG') rtgBody.innerHTML += row; else qcBody.innerHTML += row; }
+            else { if(a.mode.includes('CRANE')) rtgBody.innerHTML += row; else qcBody.innerHTML += row; }
         });
-
         countOpenEl.innerText = terminalActive.length;
         countClosedEl.innerText = terminalLogs.length;
     }
@@ -588,24 +561,17 @@
         });
     }
 
-    // --- Analytics / Pareto ---
     function initPareto() {
         const sidebar = document.getElementById('pSidebar');
         sidebar.innerHTML = '';
-        
         const types = Object.keys(config).filter(k => config[k].terminal === appTerminal);
         types.forEach((type, index) => {
             const btn = document.createElement('button');
             btn.className = `sidebar-btn ${index === 0 ? 'active' : ''}`;
             btn.innerText = type;
-            btn.onclick = () => {
-                document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                setParetoMode(type);
-            };
+            btn.onclick = () => { document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); setParetoMode(type); };
             sidebar.appendChild(btn);
         });
-
         document.getElementById('pMainTitle').innerText = `${appTerminal} ANALYTICS`;
         setParetoMode(types[0]);
     }
@@ -615,14 +581,11 @@
         pMode = mode;
         const filter = document.getElementById('pAssetFilter');
         filter.innerHTML = '<option value="All">All</option>';
-        
-        if (config[mode].list) {
-            config[mode].list.forEach(item => filter.add(new Option(item, item)));
-        } else {
+        if (config[mode].list) config[mode].list.forEach(item => filter.add(new Option(item, item)));
+        else {
             const [start, end] = config[mode].range;
             for(let i = start; i <= end; i++) {
-                const val = i < 10 ? `0${i}` : i;
-                const text = `${config[mode].prefix} ${val}`;
+                const text = `${config[mode].prefix} ${i < 10 ? '0'+i : i}`;
                 filter.add(new Option(text, text));
             }
         }
@@ -634,7 +597,6 @@
         const fT = document.getElementById('pFromTime').value, tT = document.getElementById('pToTime').value;
         const now = Date.now();
         let filtered = logs.filter(l => l.terminal === appTerminal && l.mode === pMode);
-
         if(tF === '24h') filtered = filtered.filter(l => (now - l.start) <= 86400000);
         else if(tF === 'live') filtered = filtered.filter(l => (now - l.start) <= 14400000);
         if(aF !== 'All') filtered = filtered.filter(l => l.asset === aF);
@@ -643,24 +605,16 @@
             const time = new Date(l.start).toTimeString().substring(0,5);
             return (!fT || time >= fT) && (!tT || time <= tT);
         });
-
         const minsMap = {}, countMap = {}, unitMap = {};
-        filtered.forEach(f => {
-            minsMap[f.fault] = (minsMap[f.fault] || 0) + (f.duration / 60);
-            countMap[f.fault] = (countMap[f.fault] || 0) + 1;
-            unitMap[f.asset] = (unitMap[f.asset] || 0) + 1;
-        });
-        
+        filtered.forEach(f => { minsMap[f.fault] = (minsMap[f.fault] || 0) + (f.duration / 60); countMap[f.fault] = (countMap[f.fault] || 0) + 1; unitMap[f.asset] = (unitMap[f.asset] || 0) + 1; });
         const labelsD = Object.keys(minsMap).sort((a,b) => minsMap[b] - minsMap[a]);
         const dataD = labelsD.map(l => parseFloat(minsMap[l].toFixed(1)));
         const labelsC = Object.keys(countMap).sort((a,b) => countMap[b] - countMap[a]);
         const dataC = labelsC.map(l => countMap[l]);
         const labelsU = Object.keys(unitMap).sort((a,b) => unitMap[b] - unitMap[a]);
         const dataU = labelsU.map(l => unitMap[l]);
-
         const chartColor = getAssetColor(pMode);
         const opt = { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: '#334155' }, ticks: { color: 'white', font: { size: 9 } } }, x: { ticks: { color: 'white', font: { size: 9 } } } }, plugins: { legend: { display: false } } };
-
         if(myChart) myChart.destroy();
         myChart = new Chart(document.getElementById('pChart'), { type: 'bar', data: { labels: labelsD, datasets: [{ data: dataD, backgroundColor: chartColor, borderRadius: 4 }] }, options: opt });
         if(myCountChart) myCountChart.destroy();
@@ -669,21 +623,14 @@
         myUnitChart = new Chart(document.getElementById('pUnitChart'), { type: 'bar', data: { labels: labelsU, datasets: [{ data: dataU, backgroundColor: '#10b981', borderRadius: 4 }] }, options: opt });
     }
 
-    // --- Data Management ---
     function requestReset() { document.getElementById('confirmModal').style.display = 'flex'; }
     function closeResetModal() { document.getElementById('confirmModal').style.display = 'none'; }
-    function executeReset() {
-        logs = logs.filter(l => l.terminal !== appTerminal);
-        localStorage.setItem('port_logs', JSON.stringify(logs));
-        renderPareto(); updateControlRoomTables(); closeResetModal();
-    }
+    function executeReset() { logs = logs.filter(l => l.terminal !== appTerminal); saveData(); renderPareto(); closeResetModal(); }
 
     function downloadLog() {
         const terminalLogs = logs.filter(l => l.terminal === appTerminal);
         if(!terminalLogs.length) return alert("No history to export.");
-        const data = terminalLogs.map(l => ({ 
-            TERMINAL: l.terminal, TYPE: l.mode, ASSET: l.asset, STAFF: l.staff, FAULT: l.fault, START: new Date(l.start).toLocaleString(), END: new Date(l.end).toLocaleString(), MINUTES: (l.duration / 60).toFixed(2)
-        }));
+        const data = terminalLogs.map(l => ({ TERMINAL: l.terminal, TYPE: l.mode, ASSET: l.asset, VESSEL: l.vessel || "N/A", STAFF: l.staff, FAULT: l.fault, START: new Date(l.start).toLocaleString(), END: new Date(l.end).toLocaleString(), MINUTES: (l.duration / 60).toFixed(2) }));
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Log");
