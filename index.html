@@ -216,6 +216,26 @@
         .chart-section { margin-bottom: 25px; background: rgba(0,0,0,0.1); padding: 15px; border-radius: 12px; }
         .chart-section h3 { margin-bottom: 10px; font-size: 0.85rem; color: #fff; text-transform: uppercase; }
 
+        /* Storage Section UI */
+        .storage-card {
+            background: var(--secondary);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            width: 100%;
+            max-width: 900px;
+            border: 1px solid var(--accent);
+        }
+        .storage-card h2 { font-size: 1rem; color: #94a3b8; margin-bottom: 15px; text-transform: uppercase; }
+        .storage-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #64748b; }
+        .status-dot.active { background: var(--pareto-color); }
+
         #confirmModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
         .confirm-box { background: var(--secondary); padding: 25px; border-radius: 12px; text-align: center; max-width: 350px; border: 1px solid var(--danger); }
         .confirm-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
@@ -231,6 +251,19 @@
     <div class="button-grid">
         <button class="big-btn btn-gct" onclick="navigateTo('gctDashboard')">GCT<span>General Cargo Terminal</span></button>
         <button class="big-btn btn-ct" onclick="navigateTo('ctDashboard')">CT<span>Container Terminal</span></button>
+    </div>
+
+    <!-- AUTO-SAVE STORAGE SETTINGS (Updated for Preview Frames) -->
+    <div class="storage-card">
+        <h2>System Data & Auto-Save (1hr)</h2>
+        <div class="storage-status">
+            <div id="storageDot" class="status-dot"></div>
+            <p id="storageText" style="font-size: 0.85rem; color: #94a3b8;">Status: System Ready</p>
+            <div style="flex: 1; min-width: 10px;"></div>
+            <button class="nav-btn" onclick="toggleAutoSave()" id="autoSaveToggle">Enable Auto-Export</button>
+            <button class="nav-btn" onclick="downloadFullReport()" id="manualExportBtn">Export Now (Excel)</button>
+        </div>
+        <p style="font-size: 0.7rem; color: #64748b; margin-top: 10px;">Note: Direct folder access is restricted for security. Auto-save will trigger a browser download to your Downloads folder every hour.</p>
     </div>
 </div>
 
@@ -297,6 +330,7 @@
             <h2 style="margin-bottom:12px; font-size:1.1rem; color:var(--danger); border-left: 4px solid var(--danger); padding-left: 10px;">TECH ANDONS</h2>
             <div class="andon-grid" id="techGrid"></div>
         </div>
+        <!-- Consistently styled Close Button -->
         <button id="closeAndonBtn" class="close-bar" onclick="triggerCloseAndon()">CLOSE ANDON</button>
     </div>
 </div>
@@ -404,8 +438,71 @@
     
     let activeAndons = JSON.parse(localStorage.getItem('andon_active')) || [];
     let logs = JSON.parse(localStorage.getItem('andon_logs')) || [];
+    let isAutoSaveEnabled = false;
 
-    window.onload = () => { updateControlRoomTables(); setInterval(updateTimers, 1000); };
+    window.onload = () => { 
+        updateControlRoomTables(); 
+        setInterval(updateTimers, 1000);
+        // Check for hourly interval
+        setInterval(() => {
+            if (isAutoSaveEnabled) {
+                downloadFullReport(true);
+            }
+        }, 3600000); 
+    };
+
+    // --- UPDATED EXPORT LOGIC FOR PREVIEW COMPATIBILITY ---
+    function toggleAutoSave() {
+        isAutoSaveEnabled = !isAutoSaveEnabled;
+        const dot = document.getElementById('storageDot');
+        const text = document.getElementById('storageText');
+        const btn = document.getElementById('autoSaveToggle');
+
+        if (isAutoSaveEnabled) {
+            dot.classList.add('active');
+            text.innerText = "Status: Auto-Export Active (Hourly)";
+            text.style.color = 'var(--pareto-color)';
+            btn.innerText = "Disable Auto-Export";
+            alert("Auto-Export Enabled. Browser will trigger a download every 1 hour. Please ensure your browser allows multiple downloads.");
+        } else {
+            dot.classList.remove('active');
+            text.innerText = "Status: System Ready";
+            text.style.color = "#94a3b8";
+            btn.innerText = "Enable Auto-Export";
+        }
+    }
+
+    function downloadFullReport(isAuto = false) {
+        if (!logs.length) {
+            if (!isAuto) alert("No logs found to export.");
+            return;
+        }
+
+        const data = logs.map(l => ({ 
+            TERMINAL: l.terminal, 
+            TYPE: l.mode, 
+            ASSET: l.asset, 
+            VESSEL: l.vessel || "N/A", 
+            STAFF: l.staff, 
+            FAULT: l.fault, 
+            START: new Date(l.start).toLocaleString(), 
+            END: new Date(l.end).toLocaleString(), 
+            MINUTES: (l.duration / 60).toFixed(2) 
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "AndonLogs");
+
+        const now = new Date();
+        const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
+        const filename = `Andon_Report_${timestamp}.xlsx`;
+
+        XLSX.writeFile(wb, filename);
+        if (isAuto) console.log("Auto-save export triggered: " + filename);
+    }
+
+    // --- STANDARD APP LOGIC ---
 
     function saveData() {
         localStorage.setItem('andon_active', JSON.stringify(activeAndons));
@@ -633,7 +730,7 @@
         const data = terminalLogs.map(l => ({ TERMINAL: l.terminal, TYPE: l.mode, ASSET: l.asset, VESSEL: l.vessel || "N/A", STAFF: l.staff, FAULT: l.fault, START: new Date(l.start).toLocaleString(), END: new Date(l.end).toLocaleString(), MINUTES: (l.duration / 60).toFixed(2) }));
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Log");
+        XLSX.utils.book_append_sheet(wb, ws, "LogHistory");
         XLSX.writeFile(wb, `${appTerminal}_Andon_Report.xlsx`);
     }
 </script>
