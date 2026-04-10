@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Port Andon System</title>
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #334155;
+            --rtg-color: #3b82f6;
+            --qc-color: #8b5cf6;
+            --control-color: #f59e0b;
+            --pareto-color: #10b981;
+            --danger: #ef4444;
+            --active-orange: #f97316;
+            --gct-color: #ec4899;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--primary); color: white; min-height: 100vh; overflow-x: hidden; }
+
+        /* Root Navigation Layout */
+        .page-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+        }
+
+        .page-view.active { display: flex; }
+
+        .home-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .home-header h1 {
+            font-size: clamp(2.2rem, 6vw, 3.5rem);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .home-header p {
+            color: #94a3b8;
+            font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+        }
+
+        /* Shared Button Styles */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        @media (max-width: 640px) {
+            .button-grid { grid-template-columns: 1fr; }
+        }
+
+        .big-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: clamp(140px, 20vh, 200px);
+            border: none;
+            border-radius: 20px;
+            font-size: clamp(1.4rem, 4vw, 2.2rem);
+            font-weight: 800;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            position: relative;
+        }
+
+        .big-btn:hover {
+            transform: translateY(-5px);
+            filter: brightness(1.1);
+        }
+
+        .big-btn:active { transform: scale(0.95); }
+        .big-btn span { font-size: 0.85rem; margin-top: 8px; opacity: 0.8; font-weight: normal; text-align: center; }
+
+        .btn-ct { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+        .btn-gct { background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); }
+        
+        .btn-rtg { background: var(--rtg-color); }
+        .btn-qc { background: var(--qc-color); }
+        .btn-sc { background: #06b6d4; } /* Shore Crane color */
+        .btn-ship { background: #f43f5e; } /* Ship Crane color */
+        .btn-control { background: var(--control-color); }
+        .btn-pareto { background: var(--pareto-color); }
+
+        /* Overlays */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary);
+            z-index: 100;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--accent);
+            padding-bottom: 10px;
+            gap: 10px;
+        }
+
+        .header-bar h1 { font-size: clamp(0.9rem, 3vw, 1.2rem); }
+
+        .nav-btn { 
+            background: var(--accent); 
+            color: white; 
+            padding: 8px 14px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+        }
+        
+        .nav-btn.danger { background: var(--danger); }
+
+        /* Control Room Tables & Stats */
+        .cr-stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--secondary);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 5px solid;
+        }
+        .stat-open { border-color: var(--danger); }
+        .stat-closed { border-color: var(--pareto-color); }
+        .stat-card h3 { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-card p { font-size: 1.8rem; font-weight: 800; }
+
+        .cr-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .cr-split {
+            flex: 1;
+            min-width: 280px;
+            background: var(--secondary);
+            border-radius: 12px;
+            padding: 15px;
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        .cr-split h2 { margin-bottom: 10px; font-size: 1rem; border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
+        .cr-split-table-wrapper { overflow-x: auto; flex: 1; overflow-y: auto; }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 350px; }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--accent); font-size: 0.75rem; }
+        th { background: var(--accent); position: sticky; top: 0; z-index: 10; }
+        .blink-text { color: var(--danger); font-weight: bold; animation: blinker 1s infinite; }
+
+        /* Pareto Analytics */
+        .pareto-layout { display: grid; grid-template-columns: 160px 1fr; gap: 20px; }
+        @media (max-width: 768px) { .pareto-layout { grid-template-columns: 1fr; } }
+        
+        .pareto-sidebar { display: flex; flex-direction: column; gap: 10px; }
+        @media (max-width: 768px) { .pareto-sidebar { flex-direction: row; } }
+        .sidebar-btn { 
+            padding: 12px; border: none; background: var(--secondary); color: white; border-radius: 8px; 
+            cursor: pointer; font-weight: bold; text-align: left; transition: 0.2s; font-size: 0.75rem;
+        }
+        .sidebar-btn.active { background: var(--pareto-color); }
+
+        /* Login & Console */
+        .login-card {
+            max-width: 450px;
+            margin: 40px auto;
+            background: var(--secondary);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .login-card input, .login-card select {
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px;
+            border: 1px solid var(--accent); background: var(--primary); color: white;
+        }
+
+        .andon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+        .andon-btn {
+            aspect-ratio: 1.8/1; border: 2px solid var(--accent); background: var(--secondary); color: white;
+            border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.65rem;
+        }
+        .andon-btn.active { background: var(--active-orange) !important; border-color: white; }
+
+        @keyframes blinker { 50% { opacity: 0.2; } }
+
+        .close-bar {
+            width: 100%; height: 60px; margin-top: 15px; background: var(--accent); border: none;
+            border-radius: 12px; color: white; font-size: 1.2rem; font-weight: bold; text-transform: uppercase;
+        }
+        .close-bar.blinking { background: #eab308; color: black; cursor: pointer; animation: blinker 0.8s linear infinite; }
+
+        .filter-ribbon { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--accent); padding-bottom: 10px; }
+        .filter-ribbon label { font-size: 0.6rem; color: #94a3b8; margin-bottom: 2px; }
+        .filter-ribbon select, .filter-ribbon input { padding: 6px; border-radius: 4px; background: var(--primary); color: white; border: 1px solid var(--accent); font-size: 0.7rem; }
+
+        .chart-section { margin-bottom: 25px; background: rgba(0,0,0,0.1); padding: 15px; border-radius: 12px; }
+        .chart-section h3 { margin-bottom: 10px; font-size: 0.85rem; color: #fff; text-transform: uppercase; }
+
+        #confirmModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; padding: 20px;
+        }
+        .confirm-box { background: var(--secondary); padding: 25px; border-radius: 12px; text-align: center; max-width: 350px; border: 1px solid var(--danger); }
+        .confirm-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+    </style>
+</head>
+<body>
+
+<!-- 1. MAIN ROOT PAGE -->
+<div id="mainRootPage" class="page-view active">
+    <div class="home-header">
+        <h1>PORT ANDON SYSTEM</h1>
+        <p>Terminal Entry Selection</p>
+    </div>
+    <div class="button-grid">
+        <button class="big-btn btn-gct" onclick="navigateTo('gctDashboard')">GCT<span>General Cargo Terminal</span></button>
+        <button class="big-btn btn-ct" onclick="navigateTo('ctDashboard')">CT<span>Container Terminal</span></button>
+    </div>
+</div>
+
+<!-- 2. GCT DASHBOARD -->
+<div id="gctDashboard" class="page-view">
+    <div class="home-header">
+        <button class="nav-btn danger" style="margin-bottom: 15px;" onclick="navigateTo('mainRootPage')">← Switch Terminal</button>
+        <h1>GCT OPERATIONS</h1>
+        <p>General Cargo Terminal Modules</p>
+    </div>
+    <div class="button-grid">
+        <button class="big-btn btn-sc" onclick="openLogin('SHORE CRANE')">SHORE CRANE<span>Shore Based Operations</span></button>
+        <button class="big-btn btn-ship" onclick="openLogin('SHIP CRANE')">SHIP CRANE<span>Vessel Crane Operations</span></button>
+        <button class="big-btn btn-rtg" onclick="openLogin('GCT RTG')">RTG<span>Rubber Tired Gantry</span></button>
+        <button class="big-btn btn-control" onclick="showOverlay('controlRoom')">Control Room<span>Monitoring</span></button>
+        <button class="big-btn btn-pareto" style="grid-column: span 2;" onclick="showOverlay('paretoView')">Pareto Analysis<span>Analytics Dashboard</span></button>
+    </div>
+</div>
+
+<!-- 3. CT DASHBOARD -->
+<div id="ctDashboard" class="page-view">
+    <div class="home-header">
+        <button class="nav-btn danger" style="margin-bottom: 15px;" onclick="navigateTo('mainRootPage')">← Switch Terminal</button>
+        <h1>CT OPERATIONS</h1>
+        <p>Container Terminal Modules</p>
+    </div>
+    <div class="button-grid">
+        <button class="big-btn btn-rtg" onclick="openLogin('RTG')">RTG<span>Rubber Tired Gantry</span></button>
+        <button class="big-btn btn-qc" onclick="openLogin('QC')">QC<span>Quay Crane</span></button>
+        <button class="big-btn btn-control" onclick="showOverlay('controlRoom')">Control Room<span>Monitoring</span></button>
+        <button class="big-btn btn-pareto" onclick="showOverlay('paretoView')">Pareto<span>Analytics</span></button>
+    </div>
+</div>
+
+<!-- OVERLAYS -->
+
+<!-- Asset Login -->
+<div id="loginOverlay" class="overlay">
+    <div class="header-bar">
+        <button class="nav-btn danger" onclick="hideOverlay('loginOverlay')">🏠 Home</button>
+        <h1 id="loginTitle">ASSET LOGIN</h1>
+        <div style="width:50px"></div>
+    </div>
+    <div class="login-card">
+        <h2 id="loginSubtitle">OPERATOR ACCESS</h2>
+        <input type="text" id="staffId" placeholder="Enter Staff ID">
+        <select id="assetSelect"></select>
+        <button id="loginActionBtn" class="big-btn" style="width: 100%; font-size: 1.2rem; height: 50px; margin-top: 20px;" onclick="enterConsole()">ENTER CONSOLE</button>
+    </div>
+</div>
+
+<!-- Andon Console -->
+<div id="andonConsole" class="overlay">
+    <div class="header-bar">
+        <button class="nav-btn danger" onclick="exitConsole()">🏠 Home / Logout</button>
+        <h1 id="consoleTitle">CONSOLE</h1>
+        <div style="width:50px"></div>
+    </div>
+    <div class="andon-container">
+        <div class="andon-section">
+            <h2>OPS ANDONS</h2>
+            <div class="andon-grid" id="opsGrid"></div>
+        </div>
+        <div class="andon-section">
+            <h2>TECH ANDONS</h2>
+            <div class="andon-grid" id="techGrid"></div>
+        </div>
+        <button id="closeAndonBtn" class="close-bar" onclick="triggerCloseAndon()">CLOSE ANDON</button>
+    </div>
+</div>
+
+<!-- Control Room -->
+<div id="controlRoom" class="overlay">
+    <div class="header-bar">
+        <button class="nav-btn danger" onclick="hideOverlay('controlRoom')">🏠 Home</button>
+        <h1>CONTROL LIVE VIEW</h1>
+        <button onclick="requestReset()" class="nav-btn">🗑️ RESET</button>
+    </div>
+    <div class="cr-stats-bar">
+        <div class="stat-card stat-open"><h3>Open</h3><p id="countOpen">0</p></div>
+        <div class="stat-card stat-closed"><h3>Closed</h3><p id="countClosed">0</p></div>
+    </div>
+    <div class="cr-container">
+        <div class="cr-split">
+            <h2 id="crTitleLeft">ASSET LIST 1</h2>
+            <div class="cr-split-table-wrapper">
+                <table>
+                    <thead><tr><th>No</th><th>Staff</th><th>Fault</th><th>Timer</th></tr></thead>
+                    <tbody id="rtgControlBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="cr-split">
+            <h2 id="crTitleRight">ASSET LIST 2</h2>
+            <div class="cr-split-table-wrapper">
+                <table>
+                    <thead><tr><th>No</th><th>Staff</th><th>Fault</th><th>Timer</th></tr></thead>
+                    <tbody id="qcControlBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pareto View -->
+<div id="paretoView" class="overlay">
+    <div class="header-bar">
+        <button class="nav-btn danger" onclick="hideOverlay('paretoView')">🏠 Home</button>
+        <h1 id="pMainTitle">ANALYTICS</h1>
+        <div style="display: flex; gap: 5px;">
+            <button onclick="requestReset()" class="nav-btn">🗑️</button>
+            <button onclick="downloadLog()" class="nav-btn">📥</button>
+        </div>
+    </div>
+    <div class="pareto-layout">
+        <div class="pareto-sidebar" id="pSidebar">
+            <!-- Dynamic sidebar buttons based on terminal -->
+        </div>
+        <div class="pareto-content">
+            <div class="filter-ribbon">
+                <div><label>Mode</label><select id="pTimeFilter" onchange="renderPareto()"><option value="live">Live</option><option value="24h">24h</option><option value="range">Range</option></select></div>
+                <div><label>Unit</label><select id="pAssetFilter" onchange="renderPareto()"><option value="All">All</option></select></div>
+                <div><label>Date</label><input type="date" id="pDateFilter" onchange="renderPareto()"></div>
+                <div><label>From</label><input type="time" id="pFromTime" onchange="renderPareto()"></div>
+                <div><label>To</label><input type="time" id="pToTime" onchange="renderPareto()"></div>
+            </div>
+            <div class="chart-section"><h3>Duration (Mins)</h3><div style="height: 250px;"><canvas id="pChart"></canvas></div></div>
+            <div class="chart-section"><h3>Frequency</h3><div style="height: 250px;"><canvas id="pCountChart"></canvas></div></div>
+            <div class="chart-section"><h3>Unit Perf</h3><div style="height: 250px;"><canvas id="pUnitChart"></canvas></div></div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Modal -->
+<div id="confirmModal">
+    <div class="confirm-box">
+        <h2 style="color: var(--danger);">⚠️ Reset Data?</h2>
+        <p style="margin-top: 10px; color: #94a3b8; font-size: 0.8rem;">Permanently delete log history? Active Andons won't be cleared.</p>
+        <div class="confirm-actions">
+            <button class="nav-btn" onclick="closeResetModal()">Cancel</button>
+            <button class="nav-btn danger" onclick="executeReset()">Reset Now</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Configuration ---
+    const config = {
+        // CT Assets
+        'RTG': {
+            range: [33, 128], prefix: 'RTG', terminal: 'CT',
+            ops: ["NO TT", "NO JOB TO DO", "GANTRY", "WHEELTURN", "ACCIDENT", "CONTAINER ALIGNMENT", "OTHERS"],
+            tech: ["HOIST FAULT", "SPREADER FAULT", "TROLLEY FAULT", "GANTRY FAULT", "CONTROL/POWER", "TRIM/SKEW", "OTHER"]
+        },
+        'QC': {
+            range: [8, 36], prefix: 'QC', terminal: 'CT',
+            ops: ["WAITING FOR TT", "WAITING FOR SAFETY CAGE", "WAITING FOR OHF", "ACCIDENT", "CONNECTING WIRE SLING", "JAMMED TWISTLOCK", "WAITING FOR GEAR BOX", "DAMAGED CONTAINER", "LASHING", "UNLASHING"],
+            tech: ["HOIST FAULT", "SPREADER FAULT", "GANTRY FAULT", "CONTROL/POWER", "SKEW/TRIM", "TROLLEY", "SPEED", "OTHER FAULTS"]
+        },
+        // GCT Assets
+        'SHORE CRANE': {
+            list: ["LHM600#08", "LHM600#09", "LHM180#07", "Gottwald #05", "Gottwald #06"],
+            prefix: 'SC', terminal: 'GCT',
+            ops: ["Waiting for Truck", "No cargo", "Moving to hatch", "waiting for wheel loader", "Others"],
+            tech: ["hoisting fault", "Boom fault", "gantry fault", "Grab Fault", "Swing fault", "Control/Power", "Others"]
+        },
+        'SHIP CRANE': {
+            range: [1, 5], prefix: 'SHIP', terminal: 'GCT',
+            ops: ["VESSEL DELAY", "ATTACHMENT CHANGE", "SAFETY STOP", "MANPOWER SHORTAGE"],
+            tech: ["WIRE SNAP", "HOIST LIMIT", "OIL TEMP HIGH", "CONTROL ERROR"]
+        },
+        'GCT RTG': {
+            range: [1, 15], prefix: 'GR', terminal: 'GCT',
+            ops: ["BLOCK CONGESTION", "WAITING TRUCK", "MISALIGNMENT", "SHIFTING"],
+            tech: ["ENGINE FAULT", "TYRE FAULT", "SPREADER ERROR", "POWER LOSS"]
+        }
+    };
+
+    let appTerminal = 'CT';
+    let appMode = 'RTG', currentAsset = null, currentStaff = null, pMode = 'RTG';
+    let activeAndons = JSON.parse(localStorage.getItem('port_active')) || [];
+    let logs = JSON.parse(localStorage.getItem('port_logs')) || [];
+
+    window.onload = () => { updateControlRoomTables(); setInterval(updateTimers, 1000); };
+
+    // --- Navigation ---
+    function navigateTo(id) {
+        document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
+        if(id === 'gctDashboard') appTerminal = 'GCT';
+        if(id === 'ctDashboard') appTerminal = 'CT';
+    }
+
+    function showOverlay(id) {
+        document.getElementById(id).style.display = 'block';
+        if(id === 'controlRoom') updateControlRoomTables();
+        if(id === 'paretoView') initPareto();
+    }
+
+    function hideOverlay(id) { document.getElementById(id).style.display = 'none'; }
+
+    // --- Login & Console ---
+    function openLogin(mode) {
+        appMode = mode;
+        const select = document.getElementById('assetSelect');
+        document.getElementById('loginTitle').innerText = `${mode} LOGIN`;
+        document.getElementById('loginActionBtn').style.backgroundColor = getAssetColor(mode);
+        select.innerHTML = '';
+        
+        // Use predefined list if available, else use range
+        if (config[mode].list) {
+            config[mode].list.forEach(item => select.add(new Option(item, item)));
+        } else {
+            const [start, end] = config[mode].range;
+            for(let i = start; i <= end; i++) {
+                const val = i < 10 ? `0${i}` : i;
+                const text = `${config[mode].prefix} ${val}`;
+                select.add(new Option(text, text));
+            }
+        }
+        showOverlay('loginOverlay');
+    }
+
+    function getAssetColor(mode) {
+        if(mode.includes('RTG')) return 'var(--rtg-color)';
+        if(mode.includes('QC') || mode.includes('CRANE')) return 'var(--qc-color)';
+        return 'var(--accent)';
+    }
+
+    function enterConsole() {
+        currentStaff = document.getElementById('staffId').value;
+        currentAsset = document.getElementById('assetSelect').value;
+        if(!currentStaff) return;
+        document.getElementById('consoleTitle').innerText = `${currentAsset} | ${currentStaff}`;
+        initAndonGrids();
+        hideOverlay('loginOverlay');
+        showOverlay('andonConsole');
+        refreshConsoleUI();
+    }
+
+    function exitConsole() { currentAsset = null; currentStaff = null; hideOverlay('andonConsole'); }
+
+    function initAndonGrids() {
+        const opsGrid = document.getElementById('opsGrid'), techGrid = document.getElementById('techGrid');
+        opsGrid.innerHTML = ''; techGrid.innerHTML = '';
+        config[appMode].ops.forEach(f => createBtn(f, 'OPS', opsGrid));
+        config[appMode].tech.forEach(f => createBtn(f, 'TECH', techGrid));
+    }
+
+    function createBtn(f, g, c) {
+        const b = document.createElement('button');
+        b.className = 'andon-btn'; b.innerText = f;
+        b.onclick = () => raiseAndon(f, g);
+        c.appendChild(b);
+    }
+
+    function raiseAndon(fault, group) {
+        if(activeAndons.some(a => a.asset === currentAsset)) return;
+        activeAndons.push({ 
+            id: Date.now(), 
+            terminal: appTerminal,
+            mode: appMode, 
+            asset: currentAsset, 
+            staff: currentStaff, 
+            group: group, 
+            fault: fault, 
+            start: Date.now() 
+        });
+        saveState(); refreshConsoleUI();
+    }
+
+    function refreshConsoleUI() {
+        const active = activeAndons.find(a => a.asset === currentAsset);
+        const closeBtn = document.getElementById('closeAndonBtn');
+        document.querySelectorAll('.andon-btn').forEach(b => b.classList.toggle('active', active && b.innerText === active.fault));
+        closeBtn.classList.toggle('blinking', !!active);
+    }
+
+    function triggerCloseAndon() {
+        const idx = activeAndons.findIndex(a => a.asset === currentAsset);
+        if(idx === -1) return;
+        const closed = activeAndons.splice(idx, 1)[0];
+        logs.push({ ...closed, end: Date.now(), duration: Math.floor((Date.now() - closed.start) / 1000) });
+        saveState(); refreshConsoleUI();
+    }
+
+    function saveState() {
+        localStorage.setItem('port_active', JSON.stringify(activeAndons));
+        localStorage.setItem('port_logs', JSON.stringify(logs));
+        updateControlRoomTables();
+    }
+
+    // --- Control Room & Monitoring ---
+    function updateControlRoomTables() {
+        const rtgBody = document.getElementById('rtgControlBody'), qcBody = document.getElementById('qcControlBody');
+        const countOpenEl = document.getElementById('countOpen'), countClosedEl = document.getElementById('countClosed');
+        
+        rtgBody.innerHTML = ''; qcBody.innerHTML = '';
+        
+        const terminalActive = activeAndons.filter(a => a.terminal === appTerminal);
+        const terminalLogs = logs.filter(l => l.terminal === appTerminal);
+
+        // Titles based on Terminal
+        if(appTerminal === 'CT') {
+            document.getElementById('crTitleLeft').innerText = "RTG LIVE";
+            document.getElementById('crTitleRight').innerText = "QC LIVE";
+        } else {
+            document.getElementById('crTitleLeft').innerText = "CRANES LIVE";
+            document.getElementById('crTitleRight').innerText = "RTG LIVE";
+        }
+
+        terminalActive.forEach(a => {
+            const row = `<tr><td>${a.asset}</td><td>${a.staff}</td><td class="blink-text">${a.fault}</td><td id="timer-${a.id}">--</td></tr>`;
+            if(appTerminal === 'CT') {
+                if(a.mode === 'RTG') rtgBody.innerHTML += row; else qcBody.innerHTML += row;
+            } else {
+                if(a.mode.includes('CRANE')) rtgBody.innerHTML += row; else qcBody.innerHTML += row;
+            }
+        });
+
+        countOpenEl.innerText = terminalActive.length;
+        countClosedEl.innerText = terminalLogs.length;
+    }
+
+    function updateTimers() {
+        activeAndons.forEach(a => {
+            const el = document.getElementById(`timer-${a.id}`);
+            if(el) {
+                const d = Math.floor((Date.now() - a.start) / 1000);
+                el.innerText = `${Math.floor(d/60)}m ${d%60}s`;
+            }
+        });
+    }
+
+    // --- Analytics / Pareto ---
+    function initPareto() {
+        const sidebar = document.getElementById('pSidebar');
+        sidebar.innerHTML = '';
+        
+        const types = Object.keys(config).filter(k => config[k].terminal === appTerminal);
+        types.forEach((type, index) => {
+            const btn = document.createElement('button');
+            btn.className = `sidebar-btn ${index === 0 ? 'active' : ''}`;
+            btn.innerText = type;
+            btn.onclick = () => {
+                document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                setParetoMode(type);
+            };
+            sidebar.appendChild(btn);
+        });
+
+        document.getElementById('pMainTitle').innerText = `${appTerminal} ANALYTICS`;
+        setParetoMode(types[0]);
+    }
+
+    let myChart, myCountChart, myUnitChart;
+    function setParetoMode(mode) {
+        pMode = mode;
+        const filter = document.getElementById('pAssetFilter');
+        filter.innerHTML = '<option value="All">All</option>';
+        
+        if (config[mode].list) {
+            config[mode].list.forEach(item => filter.add(new Option(item, item)));
+        } else {
+            const [start, end] = config[mode].range;
+            for(let i = start; i <= end; i++) {
+                const val = i < 10 ? `0${i}` : i;
+                const text = `${config[mode].prefix} ${val}`;
+                filter.add(new Option(text, text));
+            }
+        }
+        renderPareto();
+    }
+
+    function renderPareto() {
+        const tF = document.getElementById('pTimeFilter').value, aF = document.getElementById('pAssetFilter').value, dF = document.getElementById('pDateFilter').value;
+        const fT = document.getElementById('pFromTime').value, tT = document.getElementById('pToTime').value;
+        const now = Date.now();
+        let filtered = logs.filter(l => l.terminal === appTerminal && l.mode === pMode);
+
+        if(tF === '24h') filtered = filtered.filter(l => (now - l.start) <= 86400000);
+        else if(tF === 'live') filtered = filtered.filter(l => (now - l.start) <= 14400000);
+        if(aF !== 'All') filtered = filtered.filter(l => l.asset === aF);
+        if(dF) filtered = filtered.filter(l => new Date(l.start).toISOString().split('T')[0] === dF);
+        if(fT || tT) filtered = filtered.filter(l => {
+            const time = new Date(l.start).toTimeString().substring(0,5);
+            return (!fT || time >= fT) && (!tT || time <= tT);
+        });
+
+        const minsMap = {}, countMap = {}, unitMap = {};
+        filtered.forEach(f => {
+            minsMap[f.fault] = (minsMap[f.fault] || 0) + (f.duration / 60);
+            countMap[f.fault] = (countMap[f.fault] || 0) + 1;
+            unitMap[f.asset] = (unitMap[f.asset] || 0) + 1;
+        });
+        
+        const labelsD = Object.keys(minsMap).sort((a,b) => minsMap[b] - minsMap[a]);
+        const dataD = labelsD.map(l => parseFloat(minsMap[l].toFixed(1)));
+        const labelsC = Object.keys(countMap).sort((a,b) => countMap[b] - countMap[a]);
+        const dataC = labelsC.map(l => countMap[l]);
+        const labelsU = Object.keys(unitMap).sort((a,b) => unitMap[b] - unitMap[a]);
+        const dataU = labelsU.map(l => unitMap[l]);
+
+        const chartColor = getAssetColor(pMode);
+        const opt = { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: '#334155' }, ticks: { color: 'white', font: { size: 9 } } }, x: { ticks: { color: 'white', font: { size: 9 } } } }, plugins: { legend: { display: false } } };
+
+        if(myChart) myChart.destroy();
+        myChart = new Chart(document.getElementById('pChart'), { type: 'bar', data: { labels: labelsD, datasets: [{ data: dataD, backgroundColor: chartColor, borderRadius: 4 }] }, options: opt });
+        if(myCountChart) myCountChart.destroy();
+        myCountChart = new Chart(document.getElementById('pCountChart'), { type: 'bar', data: { labels: labelsC, datasets: [{ data: dataC, backgroundColor: '#f59e0b', borderRadius: 4 }] }, options: opt });
+        if(myUnitChart) myUnitChart.destroy();
+        myUnitChart = new Chart(document.getElementById('pUnitChart'), { type: 'bar', data: { labels: labelsU, datasets: [{ data: dataU, backgroundColor: '#10b981', borderRadius: 4 }] }, options: opt });
+    }
+
+    // --- Data Management ---
+    function requestReset() { document.getElementById('confirmModal').style.display = 'flex'; }
+    function closeResetModal() { document.getElementById('confirmModal').style.display = 'none'; }
+    function executeReset() {
+        logs = logs.filter(l => l.terminal !== appTerminal);
+        localStorage.setItem('port_logs', JSON.stringify(logs));
+        renderPareto(); updateControlRoomTables(); closeResetModal();
+    }
+
+    function downloadLog() {
+        const terminalLogs = logs.filter(l => l.terminal === appTerminal);
+        if(!terminalLogs.length) return alert("No history to export.");
+        const data = terminalLogs.map(l => ({ 
+            TERMINAL: l.terminal, TYPE: l.mode, ASSET: l.asset, STAFF: l.staff, FAULT: l.fault, START: new Date(l.start).toLocaleString(), END: new Date(l.end).toLocaleString(), MINUTES: (l.duration / 60).toFixed(2)
+        }));
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Log");
+        XLSX.writeFile(wb, `${appTerminal}_Andon_Report.xlsx`);
+    }
+</script>
+</body>
+</html>
